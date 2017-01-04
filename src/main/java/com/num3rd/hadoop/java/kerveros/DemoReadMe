@@ -1,0 +1,23 @@
+Exception in thread "main" java.io.IOException: No FileSystem for scheme: xxxx
+
+--------------------------------------------------------------------
+This is a typical case of the maven-assembly plugin breaking things.
+
+Why this happened to us
+
+Differents JARs (hadoop-commons for LocalFileSystem, hadoop-hdfs for DistributedFileSystem) each contain a different file called org.apache.hadoop.fs.FileSystem in their META-INFO/services directory. This file lists the canonical classnames of the filesystem implementations they want to declare (This is called a Service Provider Interface, see org.apache.hadoop.FileSystem line 2116).
+
+When we use maven-assembly, it merges all our JARs into one, and all META-INFO/services/org.apache.hadoop.fs.FileSystem overwrite each-other. Only one of these files remains (the last one that was added). In this case, the Filesystem list from hadoop-commons overwrites the list from hadoop-hdfs, so DistributedFileSystem was no longer declared.
+
+How we fixed it
+
+After loading the hadoop configuration, but just before doing anything Filesystem-related, we call this:
+
+    hadoopConfig.set("fs.hdfs.impl",
+        org.apache.hadoop.hdfs.DistributedFileSystem.class.getName()
+    );
+    hadoopConfig.set("fs.file.impl",
+        org.apache.hadoop.fs.LocalFileSystem.class.getName()
+    );
+
+more http://stackoverflow.com/questions/17265002/hadoop-no-filesystem-for-scheme-file
