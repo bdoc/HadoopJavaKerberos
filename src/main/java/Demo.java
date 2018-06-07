@@ -1,5 +1,3 @@
-package com.num3rd.hadoop.java.kerveros;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
@@ -12,10 +10,10 @@ import java.io.IOException;
  */
 public class Demo {
     public static void main(String[] args) {
-        String keyUser = "";
-        String keyPath = "";
-        String filePath = "";
-        String defaultFs = "";
+        String keyUser;
+        String keyPath;
+        String filePath;
+        String defaultFs;
         if (args.length >= 4) {
             keyUser = args[0];
             keyPath = args[1];
