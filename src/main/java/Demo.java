@@ -10,10 +10,8 @@ import java.io.IOException;
  */
 public class Demo {
     public static void main(String[] args) {
-        String keyUser;
-        String keyPath;
-        String filePath;
-        String defaultFs;
+        String keyUser, keyPath, filePath, defaultFs;
+
         if (args.length >= 4) {
             keyUser = args[0];
             keyPath = args[1];
@@ -24,9 +22,18 @@ public class Demo {
             System.out.println("Usage: keyUser,keyPath,filePath,defaultFs");
             return;
         }
+
         Configuration configuration = new Configuration();
         configuration.set("fs.defaultFS", defaultFs);
         configuration.set("hadoop.security.authentication", "Kerberos");
+        // For HDFS-RPC
+        configuration.set("hadoop.rpc.protection", "privacy");
+        // For HDFS-HA
+        configuration.set("dfs.nameservices", "hdfs-ha");
+        configuration.set("dfs.ha.namenodes.hdfs-ha", "nn1,nn2");
+        configuration.set("dfs.namenode.rpc-address.hdfs-ha.nn1", "node06.test:8020");
+        configuration.set("dfs.namenode.rpc-address.hdfs-ha.nn2", "node07.test:8020");
+        configuration.set("dfs.client.failover.proxy.provider.hdfs-ha", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
 
         // If use maven-assembly plugin, detail see DemoReadMe
         configuration.set("fs.hdfs.impl", DistributedFileSystem.class.getName());
